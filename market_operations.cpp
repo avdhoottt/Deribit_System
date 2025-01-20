@@ -144,12 +144,26 @@ void MarketOperations::registerMarketDataCallback(const string &symbol,
 
 json MarketOperations::sendRequest(const json &request)
 {
-    auto latencyStart = LatencyTracker::startMeasurement();
+    string operation = "Unknown";
+    if (request.contains("method"))
+    {
+        operation = request["method"].get<string>();
+    }
 
+    auto latencyStart = LatencyTracker::startMeasurement("API Call: " + operation);
+
+    // Network send timing
+    auto sendStart = LatencyTracker::startMeasurement("Network Send");
     network.transmitData(request);
-    json response = network.receiveData();
+    LatencyTracker::endMeasurement(sendStart, "Network Send Time");
 
-    LatencyTracker::endMeasurement(latencyStart, "API Request Latency");
+    // Network receive timing
+    auto receiveStart = LatencyTracker::startMeasurement("Network Receive");
+    json response = network.receiveData();
+    LatencyTracker::endMeasurement(receiveStart, "Network Receive Time");
+
+    // Total API call time
+    LatencyTracker::endMeasurement(latencyStart, "Total API Call Time: " + operation);
 
     if (response.contains("error"))
     {

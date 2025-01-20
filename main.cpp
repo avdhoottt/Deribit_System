@@ -19,6 +19,11 @@ void displayMenu()
          << "6. Exit System\n"
          << "Select option: ";
 }
+void displayFinalStats()
+{
+    cout << "\n=== Final System Performance Statistics ===\n";
+    LatencyTracker::displayLatencyStats();
+}
 
 void runTradingSystem()
 {
@@ -235,6 +240,8 @@ int main()
     {
         cout << "Starting Deribit Trading System...\n";
         runTradingSystem();
+        displayFinalStats();
+
         return 0;
     }
     catch (const exception &e)
